@@ -1,34 +1,34 @@
 [org 0x7c00]
-
-mov [BOOT_DRIVE], dl
-
 ;set stack
-mov bp, 0x8000
+mov bp, 0x9000
 mov sp, bp
 
-mov bx, 0x9000 ;sets offset
-mov dh, 5 ;number of sectors
-mov dl, [BOOT_DRIVE]
-call DiskReader
+mov bx, MSGReal
+call PrintString
 
-mov dx, [0x9000]
-call PrintHex ;This should print DAAD
-
-mov dx, [0x9000+512]
-call PrintHex ;This should print ADAD
+;Switch to Protected Mode......and never return....hopefully
+call SwitchToPM
 
 jmp $ ;hang
 
 %include 'PrintString.asm'
 %include 'PrintHex.asm'
+%include 'GDT.asm'
+%include 'PrintStringPM.asm'
+%include 'SwitchToPM.asm'
 %include 'DiskReader.asm'
 
-BOOT_DRIVE:
-    db 0
+;landed in 32-bit PM
+BeginPM:
+    mov ebx, MSGProt
+    call PrintStringPM
+    jmp $ ;hang
+
+
+MSGReal db "Successfully Started in 16-bit",0
+MSGProt db "Successfully Started in 32-bit",0
 
 ;padding and magic number
 times 510-($-$$) db 0
 dw 0xaa55
 
-times 256 dw 0xdaad
-times 256 dw 0xadad

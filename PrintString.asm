@@ -15,5 +15,3 @@ PrintChar:
     inc bx
     jmp Strloop
 
-TestString:
-    db 'My test string',0
